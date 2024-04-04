@@ -7,13 +7,13 @@
 
 ## Team Members
 
-<< List team member names >>
+<< Leon Jiang >>
 
 ***
 
 ## Project Description
 
-<< Give an overview of your project >>
+<< playable boss battle with 10 levels >>
 
 ***    
 
