@@ -1,6 +1,8 @@
 import pygame
 #import your controller
 
+
+
 def main():
     pygame.init()
     #Create an instance on your controller object

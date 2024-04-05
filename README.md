@@ -13,7 +13,7 @@
 
 ## Project Description
 
-<< playable boss battle with 10 levels >>
+<< playable boss battle with 10 levels, move character and dodge the boss' attacks, survive to win >>
 
 ***    
 
@@ -31,11 +31,11 @@
 
 ### Features
 
-1. << Feature 1 >>
-2. << Feature 2 >>
-3. << Feature 3 >>
-4. << Feature 4 >>
-5. << Feature 5 >>
+1. << Ten levels >>
+2. << able to control ur character >>
+3. << health bar of boss and character >>
+4. << bullet physics >>
+5. << smart ai boss attacks >>
 
 ### Classes
 
