@@ -94,7 +94,7 @@ class Game:
         self.background_x = 0
 
     def draw_game(self, player):
-        global background_x  # Declare background_x as global to modify its value
+        global background_x
         self.background_x -= 1
         if self.background_x <= -win_width:
             self.background_x = 0
