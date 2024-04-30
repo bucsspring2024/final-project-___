@@ -4,8 +4,8 @@ import sys
 
 
 pygame.init()
-win_height = 500
-win_width = 1000
+win_height = 720
+win_width = 1280
 win = pygame.display.set_mode((win_width, win_height))
 
 
@@ -144,7 +144,7 @@ background = pygame.transform.scale(pygame.image.load(os.path.join("assets", "Ba
 class Hero:
     def __init__(self, x, y):
         self.x = x
-        self.y = y
+        self.y = y+200
         self.velx = 10
         self.vely = 10
         self.face_right = True
@@ -189,11 +189,29 @@ class Hero:
             return 1
         if self.face_left:
             return -1
+        
+    
+
+
+class Platform:
+    def __init__(self, x, y, image, width, height):
+        self.x = x
+        self.y = y
+        self.original_image = pygame.image.load(image)
+        self.image = pygame.transform.scale(self.original_image, (width, height))
+        self.rect = self.image.get_rect(topleft=(self.x, self.y))
+
+    def draw(self, win):
+        win.blit(self.image, self.rect)
 
 # Draw Game
 class Game:
     def __init__(self):
         self.background_x = 0
+
+        platform_width = 800
+        platform_height = 50
+        self.platform = Platform(200, 450, "assets/platform.png", platform_width, platform_height)
 
     def draw_game(self, player):
         global background_x
@@ -205,6 +223,8 @@ class Game:
         # Draw the background
         win.blit(background, (self.background_x, 0))
         win.blit(background, (self.background_x + win_width, 0))
+
+        self.platform.draw(win)
 
         # Draw player
         player.draw(win)

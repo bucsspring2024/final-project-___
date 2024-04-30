@@ -1,12 +1,18 @@
 import pygame
 import os
 import sys
+import random
+import math
 
+from pygame.sprite import Group
 
 pygame.init()
 win_height = 720
 win_width = 1280
 win = pygame.display.set_mode((win_width, win_height))
+all_sprites = pygame.sprite.Group()
+all_enemies = pygame.sprite.Group()
+bullets = pygame.sprite.Group()
 
 
 class Button():
@@ -144,21 +150,26 @@ background = pygame.transform.scale(pygame.image.load(os.path.join("assets", "Ba
 class Hero:
     def __init__(self, x, y):
         self.x = x
-        self.y = y+200
+        self.y = y + 200
         self.velx = 10
         self.vely = 10
         self.face_right = True
         self.face_left = False
         self.stepIndex = 0
         self.jump = False
+        self.width = 35
+        self.height = 48
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
     def move_hero(self, userInput):
         if userInput[pygame.K_RIGHT] and self.x <= win_width - 62:
             self.x += self.velx
+            self.rect.x = self.x
             self.face_right = True
             self.face_left = False
         elif userInput[pygame.K_LEFT] and self.x >= 0:
             self.x -= self.velx
+            self.rect.x = self.x
             self.face_right = False
             self.face_left = True
         else:
@@ -178,7 +189,8 @@ class Hero:
         if userInput[pygame.K_SPACE] and self.jump is False:
             self.jump = True
         if self.jump:
-            self.y -= self.vely*4
+            self.y -= self.vely * 4
+            self.rect.y = self.y
             self.vely -= 1
         if self.vely < -10:
             self.jump = False
@@ -189,6 +201,7 @@ class Hero:
             return 1
         if self.face_left:
             return -1
+
         
     
 
@@ -204,10 +217,85 @@ class Platform:
     def draw(self, win):
         win.blit(self.image, self.rect)
 
+
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, player):
+        super().__init__()
+        self.image = pygame.image.load('assets/Enemy.png').convert_alpha()
+        self.rect = self.image.get_rect()
+        self.player = player
+        # Initialize enemy position
+        self.rect.center = (random.randint(0, 1280), 100)  # Fixed y-coordinate
+        self.dx = random.choice([-1, 1])  # Randomly choose initial direction
+        self.bullet_cooldown = 0
+        self.bullet_cooldown_max = 20  # Adjust the frequency of shooting
+
+    def update(self):
+        # Move side to side within screen boundaries
+        self.rect.x += self.dx * 2  # Adjust speed as needed
+        # Change direction if reaching screen edges
+        if self.rect.left < 0 or self.rect.right > 1280:
+            self.dx *= -1
+            self.rect.x += self.dx * 2  # Move back to stay within bounds
+
+        # Decrease cooldown each frame
+        self.bullet_cooldown -= 1
+
+        # Check if cooldown is over and shoot bullet
+        if self.bullet_cooldown <= 0:
+            # Choose random angle for bullet direction
+            angle = random.choice([0, math.pi/4, -math.pi/4])  # 0 for straight down, pi/4 for 45 degrees, -pi/4 for -45 degrees
+            # Calculate bullet velocity components based on angle
+            vel_x = math.sin(angle) * 5  # Adjust speed as needed
+            vel_y = math.cos(angle) * 5  # Adjust speed as needed
+            bullet = Bullet(self.rect.centerx, self.rect.bottom, vel_x, vel_y, speed=3) 
+            all_sprites.add(bullet)
+            bullets.add(bullet)
+            self.bullet_cooldown = self.bullet_cooldown_max
+
+    def draw(self, win):
+        win.blit(self.image, self.rect)
+
+
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y, vel_x, vel_y, speed):
+        super().__init__()
+        self.image = pygame.Surface((5, 5))  # Create a simple square bullet
+        self.image.fill((255, 0, 0))  # Fill the bullet with red color
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)  # Set initial position of the bullet
+        self.vel_x = vel_x  # Velocity components
+        self.vel_y = vel_y
+        self.speed = speed  # Bullet speed
+
+    def update(self):
+        # Move the bullet according to its velocity and speed
+        self.rect.x += self.vel_x * self.speed
+        self.rect.y += self.vel_y * self.speed
+
+        # Remove the bullet if it goes off the screen
+        if self.rect.y > win_height:
+            self.kill()
+
+    def draw(self, win):  # Define the draw method to render the bullet
+        win.blit(self.image, self.rect)
+
+
+
+
 # Draw Game
 class Game:
     def __init__(self):
         self.background_x = 0
+        self.player = Hero(250, 400)
+        self.enemies = pygame.sprite.Group()  # Group to store all enemies
+
+        # Create multiple enemies
+        for _ in range(8):
+            enemy = Enemy(self.player)
+            self.enemies.add(enemy)
 
         platform_width = 800
         platform_height = 50
@@ -220,23 +308,28 @@ class Game:
             self.background_x = 0
         
         win.fill((0, 0, 0))
-        # Draw the background
         win.blit(background, (self.background_x, 0))
         win.blit(background, (self.background_x + win_width, 0))
 
         self.platform.draw(win)
-
-        # Draw player
         player.draw(win)
+
+        self.enemies.update()  # Update all enemies
+        self.enemies.draw(win)  # Draw all enemies
+        
+        bullets.update()  # Update all bullets
+        bullets.draw(win)  # Draw all bullets
         
         pygame.time.delay(30)
         pygame.display.update()
 
 
+# Main game loop
 def main():
     if main_menu():  # Check if the main menu returns True (indicating the play button was clicked)
         game_instance = Game()
         player = Hero(250, 400)
+
         run = True
         while run:
             for event in pygame.event.get():
@@ -248,7 +341,7 @@ def main():
             player.move_hero(userInput)
             player.jump_motion(userInput)
 
-            game_instance.draw_game(player)
+            game_instance.draw_game(player)  # Pass the player object
 
         pygame.quit()
 
