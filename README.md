@@ -3,7 +3,7 @@
 :warning: Everything between << >> needs to be replaced (remove << >> after replacing)
 
 # << Project Title >>
-## CS110 Final Project  << Semester, Year >>
+## CS110 Final Project  << Spring, 2024 >>
 
 ## Team Members
 
@@ -31,11 +31,11 @@
 
 ### Features
 
-1. << Ten levels >>
+1. << infinite background >>
 2. << able to control ur character >>
-3. << health bar of boss and character >>
-4. << bullet physics >>
-5. << smart ai boss attacks >>
+3. << health character >>
+4. << obsacles to jump on >>
+5. << random enemy  >>
 
 ### Classes
 
