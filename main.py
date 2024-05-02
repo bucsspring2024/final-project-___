@@ -1,13 +1,9 @@
-from src.sample_controller import main_menu, main, play
-
+from src.sample_controller import Controller
 
 
 def main():
-    run = main_menu(), play(), 
-    # run = Bullet(), Hero(), Enemy()
-    run = main()
-    run.main()
-
+    run = Controller()
+    run.mainloop()
 main()
 
 

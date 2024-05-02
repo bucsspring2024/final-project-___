@@ -119,7 +119,6 @@ SCREEN = pygame.display.set_mode((1280, 720))
 pygame.display.set_caption("Menu")
 
 BG = pygame.image.load("assets/MenuBackground.png")
-BG = pygame.transform.scale(BG, (win_width, win_height))
 
 
 def get_font(size):  # Returns Press-Start-2P in the desired size
@@ -131,6 +130,11 @@ def play():
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
         SCREEN.fill("black")
+
+        PLAY_TEXT = get_font(45).render("This is the PLAY screen.", True, "White")
+        PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 260))
+        SCREEN.blit(PLAY_TEXT, PLAY_RECT)
+
         PLAY_BACK = Button(image=None, pos=(640, 460),
                            text_input="BACK", font=get_font(75), base_color="White", hovering_color="Green")
 
@@ -154,9 +158,8 @@ def main_menu():
 
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
-        MENU_TEXT = get_font(80).render("Save the World", True, (255, 0, 0))  # Change the title color to red
-
-        MENU_RECT = MENU_TEXT.get_rect(center=(640, 150))
+        MENU_TEXT = get_font(100).render("MAIN MENU", True, "#b68f40")
+        MENU_RECT = MENU_TEXT.get_rect(center=(640, 100))
 
         PLAY_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 350),
                              text_input="PLAY", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
@@ -417,63 +420,67 @@ def game_over_screen():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if retry_button.checkForInput(pygame.mouse.get_pos()):
                     # Restart the game
-                    main()
+                    controller = Controller()  # Create a new instance of Controller
+                    controller.mainloop()  # Start the main loop again
                 elif close_button.checkForInput(pygame.mouse.get_pos()):
                     pygame.quit()
                     sys.exit()
 
+
         pygame.display.update()
 
+class Controller:
+    def mainloop(self):
+        global game_over, game_won
 
+        if main_menu():
+            game_instance = Game()
+            player = Hero(250, 400)
+            start_time = pygame.time.get_ticks()  # Record the start time
 
-def main():
-    global game_over, game_won
+            run = True
+            while run:
+                current_time = pygame.time.get_ticks()  # Get the current time
+                elapsed_time = (current_time - start_time) / 1000  # Convert milliseconds to seconds
 
-    if main_menu():
-        game_instance = Game()
-        player = Hero(250, 400)
-        start_time = pygame.time.get_ticks()  # Record the start time
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        run = False
 
-        run = True
-        while run:
-            current_time = pygame.time.get_ticks()  # Get the current time
-            elapsed_time = (current_time - start_time) / 1000  # Convert milliseconds to seconds
+                userInput = pygame.key.get_pressed()
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                player.move_hero(userInput)
+                player.jump_motion(userInput)
+
+                game_instance.draw_game(player)
+
+                # Check for collisions between hero and bullets
+                if pygame.sprite.spritecollideany(player, bullets):
+                    game_over = True
+                    # Display game over screen
+                    game_over_screen()
+                    # Exit the game loop
                     run = False
 
-            userInput = pygame.key.get_pressed()
+                # Check if 10 seconds have elapsed
+                if elapsed_time >= 15:
+                    game_won = True
+                    # Display winning screen
+                    winning_screen()
+                    # Exit the game loop
+                    run = False
 
-            player.move_hero(userInput)
-            player.jump_motion(userInput)
-
-            game_instance.draw_game(player)
-
-            # Check for collisions between hero and bullets
-            if pygame.sprite.spritecollideany(player, bullets):
-                game_over = True
-                # Display game over screen
-                game_over_screen()
-                # Exit the game loop
-                run = False
-
-            # Check if 10 seconds have elapsed
-            if elapsed_time >= 15:
-                game_won = True
-                # Display winning screen
-                winning_screen()
-                # Exit the game loop
-                run = False
-
-            
-            # Check if the game is won
-            if game_won:
-                winning_screen()  # Display the winning screen
-                run = False  # Exit the game loop when the game is won
+                
+                # Check if the game is won
+                if game_won:
+                    winning_screen()  # Display the winning screen
+                    run = False  # Exit the game loop when the game is won
 
 
 
 if __name__ == "__main__":
-    main()
+    controller = Controller()
+    controller.mainloop()
+    pygame.quit()
+
     pygame.quit()

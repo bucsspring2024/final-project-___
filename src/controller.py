@@ -427,56 +427,54 @@ def game_over_screen():
 
         pygame.display.update()
 
+class Controller:
+    def mainloop(self):
+        global game_over, game_won, hero_flashing
 
+        if main_menu():
+            game_instance = Game()
+            player = Hero(250, 400)
+            start_time = pygame.time.get_ticks()  # Record the start time
 
-def main():
-    global game_over, game_won, hero_flashing
+            run = True
+            while run:
+                current_time = pygame.time.get_ticks()  # Get the current time
+                elapsed_time = (current_time - start_time) / 1000  # Convert milliseconds to seconds
 
-    if main_menu():
-        game_instance = Game()
-        player = Hero(250, 400)
-        start_time = pygame.time.get_ticks()  # Record the start time
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        run = False
 
-        run = True
-        while run:
-            current_time = pygame.time.get_ticks()  # Get the current time
-            elapsed_time = (current_time - start_time) / 1000  # Convert milliseconds to seconds
+                userInput = pygame.key.get_pressed()
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                player.move_hero(userInput)
+                player.jump_motion(userInput)
+
+                game_instance.draw_game(player)
+
+                # Check for collisions between hero and bullets
+                if pygame.sprite.spritecollideany(player, bullets):
+                    game_over = True
+                    # Display game over screen
+                    game_over_screen()
+                    # Exit the game loop
                     run = False
 
-            userInput = pygame.key.get_pressed()
+                # Check if 10 seconds have elapsed
+                if elapsed_time >= 15:
+                    game_won = True
+                    # Display winning screen
+                    winning_screen()
+                    # Exit the game loop
+                    run = False
 
-            player.move_hero(userInput)
-            player.jump_motion(userInput)
-
-            game_instance.draw_game(player)
-
-            # Check for collisions between hero and bullets
-            if pygame.sprite.spritecollideany(player, bullets):
-                game_over = True
-                # Display game over screen
-                game_over_screen()
-                # Exit the game loop
-                run = False
-
-            # Check if 10 seconds have elapsed
-            if elapsed_time >= 15:
-                game_won = True
-                # Display winning screen
-                winning_screen()
-                # Exit the game loop
-                run = False
-
-            
-            # Check if the game is won
-            if game_won:
-                winning_screen()  # Display the winning screen
-                run = False  # Exit the game loop when the game is won
+                
+                # Check if the game is won
+                if game_won:
+                    winning_screen()  # Display the winning screen
+                    run = False  # Exit the game loop when the game is won
 
 
 
 if __name__ == "__main__":
-    main()
     pygame.quit()
