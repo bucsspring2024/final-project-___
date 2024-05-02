@@ -23,11 +23,6 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 
-hero_flash_duration = 100000
-hero_flash_timer = 0
-hero_flash_start_time = 0
-hero_flashing = False
-
 
 def display_text(text, font, size, color, x, y):
     font = pygame.font.Font(font, size)
@@ -124,6 +119,7 @@ SCREEN = pygame.display.set_mode((1280, 720))
 pygame.display.set_caption("Menu")
 
 BG = pygame.image.load("assets/MenuBackground.png")
+BG = pygame.transform.scale(BG, (win_width, win_height))
 
 
 def get_font(size):  # Returns Press-Start-2P in the desired size
@@ -135,11 +131,6 @@ def play():
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
         SCREEN.fill("black")
-
-        PLAY_TEXT = get_font(45).render("This is the PLAY screen.", True, "White")
-        PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 260))
-        SCREEN.blit(PLAY_TEXT, PLAY_RECT)
-
         PLAY_BACK = Button(image=None, pos=(640, 460),
                            text_input="BACK", font=get_font(75), base_color="White", hovering_color="Green")
 
@@ -163,8 +154,9 @@ def main_menu():
 
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
-        MENU_TEXT = get_font(100).render("MAIN MENU", True, "#b68f40")
-        MENU_RECT = MENU_TEXT.get_rect(center=(640, 100))
+        MENU_TEXT = get_font(80).render("Save the World", True, (255, 0, 0))  # Change the title color to red
+
+        MENU_RECT = MENU_TEXT.get_rect(center=(640, 150))
 
         PLAY_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 350),
                              text_input="PLAY", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
@@ -298,23 +290,7 @@ class Hero:
         if self.face_left:
             return -1
 
-    def flash(self):
-        # Flash the hero
-        global hero_flashing, hero_flash_start_time
-        hero_flashing = True
-        hero_flash_start_time = pygame.time.get_ticks()
 
-
-class Platform:
-    def __init__(self, x, y, image, width, height):
-        self.x = x
-        self.y = y
-        self.original_image = pygame.image.load(image)
-        self.image = pygame.transform.scale(self.original_image, (width, height))
-        self.rect = self.image.get_rect(topleft=(self.x, self.y))
-
-    def draw(self, win):
-        win.blit(self.image, self.rect)
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -379,7 +355,6 @@ class Bullet(pygame.sprite.Sprite):
 
         if pygame.sprite.collide_rect(self, self.player):
             self.kill()  # Remove the bullet
-            self.player.flash()
 
     def draw(self, win):  # Define the draw method to render the bullet
         win.blit(self.image, self.rect)
@@ -392,13 +367,9 @@ class Game:
         self.enemies = pygame.sprite.Group()  # Group to store all enemies
 
         # Create multiple enemies
-        for _ in range(8):
+        for _ in range(10):
             enemy = Enemy(self.player)
             self.enemies.add(enemy)
-
-        platform_width = 800
-        platform_height = 50
-        self.platform = Platform(200, 450, "assets/platform.png", platform_width, platform_height)
 
     def draw_game(self, player):
         global background_x
@@ -410,7 +381,6 @@ class Game:
         win.blit(background, (self.background_x, 0))
         win.blit(background, (self.background_x + win_width, 0))
 
-        self.platform.draw(win)
         player.draw(win)
 
         self.enemies.update()  # Update all enemies
@@ -421,63 +391,6 @@ class Game:
 
         pygame.time.delay(30)
         pygame.display.update()
-
-
-def main():
-    global game_over, game_won, hero_flashing
-
-    if main_menu():
-        game_instance = Game()
-        player = Hero(250, 400)
-        start_time = pygame.time.get_ticks()  # Record the start time
-
-        run = True
-        while run:
-            current_time = pygame.time.get_ticks()  # Get the current time
-            elapsed_time = (current_time - start_time) / 1000  # Convert milliseconds to seconds
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    run = False
-
-            userInput = pygame.key.get_pressed()
-
-            player.move_hero(userInput)
-            player.jump_motion(userInput)
-
-            game_instance.draw_game(player)
-
-            # Check for collisions between hero and bullets
-            if pygame.sprite.spritecollideany(player, bullets):
-                game_over = True
-                # Display game over screen
-                game_over_screen()
-                # Exit the game loop
-                run = False
-
-            # Check if 10 seconds have elapsed
-            if elapsed_time >= 1:
-                game_won = True
-                # Display winning screen
-                winning_screen()
-                # Exit the game loop
-                run = False
-
-            
-            # Check if the game is won
-            if game_won:
-                winning_screen()  # Display the winning screen
-                run = False  # Exit the game loop when the game is won
-
-            if hero_flashing:
-                current_time = pygame.time.get_ticks()
-                if current_time - hero_flash_start_time >= hero_flash_duration:
-                    hero_flashing = False
-
-            if hero_flashing:
-                player.draw(win, color=RED)
-            else:
-                player.draw(win)
 
 
 # Define the game over screen function
@@ -512,24 +425,53 @@ def game_over_screen():
         pygame.display.update()
 
 
-class NinjasAPI:
-    def __init__(self, token):
-        self.token = token
-        self.base_url = "https://ninjasapi.herokuapp.com/"
 
-    def get_text(self):
-        headers = {"Authorization": f"Bearer {self.token}"}
-        response = requests.get(self.base_url + "text", headers=headers)
-        if response.status_code == 200:
-            return response.json()["text"]
-        else:
-            return None
+def main():
+    global game_over, game_won
 
-    def post_text(self, text):
-        headers = {"Authorization": f"Bearer {self.token}"}
-        data = {"text": text}
-        response = requests.post(self.base_url + "text", headers=headers, json=data)
-        return response.status_code == 201
+    if main_menu():
+        game_instance = Game()
+        player = Hero(250, 400)
+        start_time = pygame.time.get_ticks()  # Record the start time
+
+        run = True
+        while run:
+            current_time = pygame.time.get_ticks()  # Get the current time
+            elapsed_time = (current_time - start_time) / 1000  # Convert milliseconds to seconds
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+
+            userInput = pygame.key.get_pressed()
+
+            player.move_hero(userInput)
+            player.jump_motion(userInput)
+
+            game_instance.draw_game(player)
+
+            # Check for collisions between hero and bullets
+            if pygame.sprite.spritecollideany(player, bullets):
+                game_over = True
+                # Display game over screen
+                game_over_screen()
+                # Exit the game loop
+                run = False
+
+            # Check if 10 seconds have elapsed
+            if elapsed_time >= 15:
+                game_won = True
+                # Display winning screen
+                winning_screen()
+                # Exit the game loop
+                run = False
+
+            
+            # Check if the game is won
+            if game_won:
+                winning_screen()  # Display the winning screen
+                run = False  # Exit the game loop when the game is won
+
 
 
 if __name__ == "__main__":

@@ -1,6 +1,14 @@
-from src.sample_controller import Game, Hero, Enemy, Platform, Bullet, Button
+from src.sample_controller import main_menu, main, play
 
 
+
+def main():
+    run = main_menu(), play(), 
+    # run = Bullet(), Hero(), Enemy()
+    run = main()
+    run.main()
+
+main()
 
 
 

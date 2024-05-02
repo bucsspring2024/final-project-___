@@ -294,16 +294,6 @@ class Hero:
             return -1
 
 
-class Platform:
-    def __init__(self, x, y, image, width, height):
-        self.x = x
-        self.y = y
-        self.original_image = pygame.image.load(image)
-        self.image = pygame.transform.scale(self.original_image, (width, height))
-        self.rect = self.image.get_rect(topleft=(self.x, self.y))
-
-    def draw(self, win):
-        win.blit(self.image, self.rect)
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -368,7 +358,6 @@ class Bullet(pygame.sprite.Sprite):
 
         if pygame.sprite.collide_rect(self, self.player):
             self.kill()  # Remove the bullet
-            self.player.flash()
 
     def draw(self, win):  # Define the draw method to render the bullet
         win.blit(self.image, self.rect)
@@ -385,10 +374,6 @@ class Game:
             enemy = Enemy(self.player)
             self.enemies.add(enemy)
 
-        platform_width = 800
-        platform_height = 50
-        self.platform = Platform(200, 450, "assets/platform.png", platform_width, platform_height)
-
     def draw_game(self, player):
         global background_x
         self.background_x -= 1
@@ -399,7 +384,6 @@ class Game:
         win.blit(background, (self.background_x, 0))
         win.blit(background, (self.background_x + win_width, 0))
 
-        self.platform.draw(win)
         player.draw(win)
 
         self.enemies.update()  # Update all enemies
@@ -410,6 +394,39 @@ class Game:
 
         pygame.time.delay(30)
         pygame.display.update()
+
+
+# Define the game over screen function
+def game_over_screen():
+    while True:
+        # Display game over text and options
+        SCREEN.fill("black")
+        game_over_text = get_font(50).render("Game Over", True, "White")
+        game_over_rect = game_over_text.get_rect(center=(640, 260))
+        SCREEN.blit(game_over_text, game_over_rect)
+
+        # Add retry and close buttons
+        retry_button = Button(image=None, pos=(640, 420), text_input="Retry", font=get_font(50), base_color="White", hovering_color="Green")
+        close_button = Button(image=None, pos=(640, 520), text_input="Close", font=get_font(50), base_color="White", hovering_color="Red")
+
+        retry_button.update(SCREEN)
+        close_button.update(SCREEN)
+
+        # Check for input from the user
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if retry_button.checkForInput(pygame.mouse.get_pos()):
+                    # Restart the game
+                    main()
+                elif close_button.checkForInput(pygame.mouse.get_pos()):
+                    pygame.quit()
+                    sys.exit()
+
+        pygame.display.update()
+
 
 
 def main():
@@ -445,7 +462,7 @@ def main():
                 run = False
 
             # Check if 10 seconds have elapsed
-            if elapsed_time >= 1:
+            if elapsed_time >= 15:
                 game_won = True
                 # Display winning screen
                 winning_screen()
@@ -458,57 +475,6 @@ def main():
                 winning_screen()  # Display the winning screen
                 run = False  # Exit the game loop when the game is won
 
-
-# Define the game over screen function
-def game_over_screen():
-    while True:
-        # Display game over text and options
-        SCREEN.fill("black")
-        game_over_text = get_font(50).render("Game Over", True, "White")
-        game_over_rect = game_over_text.get_rect(center=(640, 260))
-        SCREEN.blit(game_over_text, game_over_rect)
-
-        # Add retry and close buttons
-        retry_button = Button(image=None, pos=(640, 420), text_input="Retry", font=get_font(50), base_color="White", hovering_color="Green")
-        close_button = Button(image=None, pos=(640, 520), text_input="Close", font=get_font(50), base_color="White", hovering_color="Red")
-
-        retry_button.update(SCREEN)
-        close_button.update(SCREEN)
-
-        # Check for input from the user
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if retry_button.checkForInput(pygame.mouse.get_pos()):
-                    # Restart the game
-                    main()
-                elif close_button.checkForInput(pygame.mouse.get_pos()):
-                    pygame.quit()
-                    sys.exit()
-
-        pygame.display.update()
-
-
-class NinjasAPI:
-    def __init__(self, token):
-        self.token = token
-        self.base_url = "https://ninjasapi.herokuapp.com/"
-
-    def get_text(self):
-        headers = {"Authorization": f"Bearer {self.token}"}
-        response = requests.get(self.base_url + "text", headers=headers)
-        if response.status_code == 200:
-            return response.json()["text"]
-        else:
-            return None
-
-    def post_text(self, text):
-        headers = {"Authorization": f"Bearer {self.token}"}
-        data = {"text": text}
-        response = requests.post(self.base_url + "text", headers=headers, json=data)
-        return response.status_code == 201
 
 
 if __name__ == "__main__":
