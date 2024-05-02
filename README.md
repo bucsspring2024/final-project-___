@@ -1,21 +1,16 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-718a45dd9cf7e7f842a935f5ebbe5719a5e09af4491e668f4dbf3b35d5cca122.svg)](https://classroom.github.com/online_ide?assignment_repo_id=14591039&assignment_repo_type=AssignmentRepo)
-
-:warning: Everything between << >> needs to be replaced (remove << >> after replacing)
-
-# << Project Title >>
-## CS110 Final Project  << Spring, 2024 >>
+# Bullet Hell
+## CS110 Final Project Spring, 2024 
 
 ## Team Members
-
-<< Leon Jiang >>
+Leon Jiang 
 
 ***
 
 ## Project Description
+My project is a game where you have to dodge all the bullets being fired at you. To beat the game, you need to survive for 15 seconds, then the hero will tell a dad joke to scare the monsters away.
 
-<< playable boss battle with 10 levels, move character and dodge the boss' attacks, survive to win >>
 
-***    
+***   
 
 ## GUI Design
 
@@ -31,20 +26,39 @@
 
 ### Features
 
-1. << infinite background >>
-2. << able to control ur character >>
-3. << health character >>
-4. << obsacles to jump on >>
-5. << random enemy  >>
+1. moveable character with arrow keys and space bar 
+2. gave over and winning screen
+3. start menu
+4. enemies shooting at the playable character
+5. scrolling background
+
+### Additional Modules
+Math: https://docs.python.org/3/library/math.html
 
 ### Classes
 
-- << You should have a list of each of your classes with a description >>
+- Button 
+Represents a clickable button on the screen. It can display either an image or text, change color when hovered over, and detect mouse clicks within its area
+- Hero
+Handles the movement, jumping, direction facing, and drawing of the hero sprite on the screen.
+- Enemy
+Represents the enemy entities in the game. Each enemy has its own movement pattern, shooting behavior, and collision detection with the player. 
+- Bullet
+Represents the bullets fired by enemies in the game. It moves across the screen, detects collisions with the player, and gets removed when it goes off the screen.
+- Game
+Manages the game state, including the player, enemies, background scrolling, and drawing everything on the screen. It initializes the game environment and updates it in the game loop.
+-Controller
+Controls the main loop of the game. It handles user input, updates the game state, and manages transitions between different screens such as the main menu, gameplay, game over screen, and winning screen.
 
 ## ATP
 
 | Step                 |Procedure             |Expected Results                   |
 |----------------------|:--------------------:|----------------------------------:|
-|  1                   | Run Counter Program  |GUI window appears with count = 0  |
-|  2                   | click count button   | display changes to count = 1      |
-etc...
+|  1                   | Run the Program  |Main menu screen comes with play and quit  |
+|  2                   | Click play on the main menu | Game screen appears with player and enemies     |
+|  3                   |Use left and right arrow keys| Player should move left and right according to the keys pressed|
+|  4                   |Press the spacebar | Player should jump on the screen|
+|  5                   |Get hit by bullet| Game over screen should come up with retry or quit button|
+|  6                   |Click quit or retry |If you hit quit it should close the window, if you hit retry the main menu comes up again|
+|  7                   |Survive for 15 seconds | The game winning screen should come up|
+|  8                   |Go back to or open the main menu to test out quit button| Game window should close|
