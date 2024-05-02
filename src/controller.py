@@ -110,10 +110,8 @@ def winning_screen():
     global game_won
     win.fill(WHITE)
     display_text("Congratulations! You won!", None, 40, (0, 0, 0), win_width // 2, win_height // 2 - 50)
-    # Display the dad joke without dictionary formatting
     dad_joke_str = dad_joke['joke']
     display_text(dad_joke_str, None, 30, (0, 0, 0), win_width // 2, win_height // 2 + 50)
-    # Additional text
     additional_text = "The monsters heard the joke cringed and went back to where they came from. The end!!!"
     display_text(additional_text, None, 30, (0, 0, 0), win_width // 2, win_height // 2 + 100)
 
@@ -294,7 +292,7 @@ def main_menu():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_BUTTON.check_for_input(MENU_MOUSE_POS):
-                    return True  # Signal to start the game
+                    return True 
                 if QUIT_BUTTON.check_for_input(MENU_MOUSE_POS):
                     pygame.quit()
                     sys.exit()
@@ -421,35 +419,30 @@ class Enemy(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.image.load('assets/Enemy.png').convert_alpha()
         self.rect = self.image.get_rect()
-        self.player = player  # Store the player object
-        # Initialize enemy position
-        self.rect.center = (random.randint(0, 1280), 100)  # Fixed y-coordinate
-        self.dx = random.choice([-1, 1])  # Randomly choose initial direction
+        self.player = player 
+        self.rect.center = (random.randint(0, 1280), 100) 
+        self.dx = random.choice([-1, 1])
         self.bullet_cooldown = 0
-        self.bullet_cooldown_max = 20  # Adjust the frequency of shooting
+        self.bullet_cooldown_max = 20  
 
     def update(self):
         """
         Updates the state of the enemy.
         """
-        # Move side to side within screen boundaries
-        self.rect.x += self.dx * 2  # Adjust speed as needed
-        # Change direction if reaching screen edges
+        self.rect.x += self.dx * 2 
         if self.rect.left < 0 or self.rect.right > 1280:
             self.dx *= -1
-            self.rect.x += self.dx * 2  # Move back to stay within bounds
+            self.rect.x += self.dx * 2  
 
-        # Decrease cooldown each frame
         self.bullet_cooldown -= 1
 
-        # Check if cooldown is over and shoot bullet
+
         if self.bullet_cooldown <= 0:
-            # Choose random angle for bullet direction
             angle = random.choice([0, math.pi/4, -math.pi/4])  # 0 for straight down, pi/4 for 45 degrees, -pi/4 for -45 degrees
             # Calculate bullet velocity components based on angle
-            vel_x = math.sin(angle) * 5  # Adjust speed as needed
-            vel_y = math.cos(angle) * 5  # Adjust speed as needed
-            bullet = Bullet(self.rect.centerx, self.rect.bottom, vel_x, vel_y, speed=3, player=self.player)  # Pass the player object
+            vel_x = math.sin(angle) * 5 
+            vel_y = math.cos(angle) * 5  
+            bullet = Bullet(self.rect.centerx, self.rect.bottom, vel_x, vel_y, speed=3, player=self.player) 
             all_sprites.add(bullet)
             bullets.add(bullet)
             self.bullet_cooldown = self.bullet_cooldown_max
@@ -479,29 +472,28 @@ class Bullet(pygame.sprite.Sprite):
             player (Hero): The player object.
         """
         super().__init__()
-        self.image = pygame.Surface((5, 5))  # Create a simple square bullet
-        self.image.fill((255, 0, 0))  # Fill the bullet with red color
+        self.image = pygame.Surface((5, 5)) 
+        self.image.fill((255, 0, 0)) 
         self.rect = self.image.get_rect()
-        self.rect.center = (x, y)  # Set initial position of the bullet
-        self.vel_x = vel_x  # Velocity components
+        self.rect.center = (x, y)  
+        self.vel_x = vel_x 
         self.vel_y = vel_y
-        self.speed = speed  # Bullet speed
+        self.speed = speed  
         self.player = player
 
     def update(self):
         """
         Updates the state of the bullet.
         """
-        # Move the bullet according to its velocity and speed
+
         self.rect.x += self.vel_x * self.speed
         self.rect.y += self.vel_y * self.speed
 
-        # Remove the bullet if it goes off the screen
         if self.rect.y > win_height:
             self.kill()
 
         if pygame.sprite.collide_rect(self, self.player):
-            self.kill()  # Remove the bullet
+            self.kill()  
 
     def draw(self, win):
         """
@@ -520,9 +512,9 @@ class Game:
         """
         self.background_x = 0
         self.player = Hero(250, 400)
-        self.enemies = pygame.sprite.Group()  # Group to store all enemies
+        self.enemies = pygame.sprite.Group()  
 
-        # Create multiple enemies
+
         for _ in range(10):
             enemy = Enemy(self.player)
             self.enemies.add(enemy)
@@ -545,11 +537,11 @@ class Game:
 
         player.draw(win)
 
-        self.enemies.update()  # Update all enemies
-        self.enemies.draw(win)  # Draw all enemies
+        self.enemies.update()  
+        self.enemies.draw(win)  
 
-        bullets.update()  # Update all bullets
-        bullets.draw(win)  # Draw all bullets
+        bullets.update()  
+        bullets.draw(win) 
 
         pygame.time.delay(30)
         pygame.display.update()
@@ -560,29 +552,26 @@ def game_over_screen():
     Displays the game over screen and handles user input.
     """
     while True:
-        # Display game over text and options
         SCREEN.fill("black")
         game_over_text = get_font(50).render("Game Over", True, "White")
         game_over_rect = game_over_text.get_rect(center=(640, 260))
         SCREEN.blit(game_over_text, game_over_rect)
 
-        # Add retry and close buttons
         retry_button = Button(image=None, pos=(640, 420), text_input="Retry", font=get_font(50), base_color="White", hovering_color="Green")
         close_button = Button(image=None, pos=(640, 520), text_input="Close", font=get_font(50), base_color="White", hovering_color="Red")
 
         retry_button.update(SCREEN)
         close_button.update(SCREEN)
 
-        # Check for input from the user
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if retry_button.check_for_input(pygame.mouse.get_pos()):
-                    # Restart the game
-                    controller = Controller()  # Create a new instance of Controller
-                    controller.main_loop()  # Start the main loop again
+                    controller = Controller() 
+                    controller.main_loop()  
                 elif close_button.check_for_input(pygame.mouse.get_pos()):
                     pygame.quit()
                     sys.exit()
@@ -601,12 +590,12 @@ class Controller:
         if main_menu():
             game_instance = Game()
             player = Hero(250, 400)
-            start_time = pygame.time.get_ticks()  # Record the start time
+            start_time = pygame.time.get_ticks() 
 
             run = True
             while run:
-                current_time = pygame.time.get_ticks()  # Get the current time
-                elapsed_time = (current_time - start_time) / 1000  # Convert milliseconds to seconds
+                current_time = pygame.time.get_ticks() 
+                elapsed_time = (current_time - start_time) / 1000  
 
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -619,25 +608,18 @@ class Controller:
 
                 game_instance.draw_game(player)
 
-                # Check for collisions between hero and bullets
                 if pygame.sprite.spritecollideany(player, bullets):
                     game_over = True
-                    # Display game over screen
                     game_over_screen()
-                    # Exit the game loop
                     run = False
 
-                # Check if 10 seconds have elapsed
                 if elapsed_time >= 15:
                     game_won = True
-                    # Display winning screen
                     winning_screen()
-                    # Exit the game loop
                     run = False
 
-                # Check if the game is won
                 if game_won:
-                    winning_screen()  # Display the winning screen
-                    run = False  # Exit the game loop when the game is won
+                    winning_screen()  
+                    run = False  
 
 
