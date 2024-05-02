@@ -114,7 +114,7 @@ def winning_screen():
     dad_joke_str = dad_joke['joke']
     display_text(dad_joke_str, None, 30, (0, 0, 0), win_width // 2, win_height // 2 + 50)
     # Additional text
-    additional_text = "The monsters heard the joke and went back to where they came from. The end!!!"
+    additional_text = "The monsters heard the joke cringed and went back to where they came from. The end!!!"
     display_text(additional_text, None, 30, (0, 0, 0), win_width // 2, win_height // 2 + 100)
 
     pygame.display.update()

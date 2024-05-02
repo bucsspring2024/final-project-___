@@ -9,6 +9,8 @@ Leon Jiang
 ## Project Description
 My project is a game where you have to dodge all the bullets being fired at you. To beat the game, you need to survive for 15 seconds, then the hero will tell a dad joke to scare the monsters away.
 
+Sometimes the bullets won't register. No exactly sure why. But it should work most of the time. The hit box is shown so its easier for the player.
+
 
 ***   
 
